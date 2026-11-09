@@ -21,53 +21,66 @@ function field([key,title,kind],method){
  return '<label class="'+(kind==='textarea'?'wide':'')+'">'+esc(title)+input+'</label>';
 }
 function formHTML(action){
- return '<section class="action"><div class="actionTop"><div><span class="eyebrow">'+esc(action.scope==='first'?project.labels[0]:project.labels[1])+
- '</span><h2>'+esc(action.title)+'</h2><div class="hint">'+esc(action.subtitle)+'</div></div><span class="role">'+esc(action.role)+'</span></div>'+
+ const index=project.forms.findIndex(x=>x.method===action.method);
+ const tag=index<2?'INTAKE':index<4?'DISPUTE':'RESOLUTION';
+ const mark=index===3?'AI CONSENSUS':action.scope==='second'?'LEDGER':'SIGNED ACTION';
+ return '<article class="action"><div class="actionTop"><div class="action-id">'+String(index+1).padStart(2,'0')+'</div><div class="action-intro"><div class="action-meta">'+tag+' / '+esc(mark)+'</div><h2>'+esc(action.title)+'</h2><p class="hint">'+esc(action.subtitle)+'</p></div><span class="role">'+esc(action.role)+'</span></div>'+
  '<form data-form="'+esc(action.method)+'"><div class="fields">'+action.fields.map(f=>field(f,action.method)).join('')+'</div>'+
- '<div class="actionFooter">'+(action.preset?'<button type="button" data-fill="'+esc(action.method)+'">Fill example</button>':'')+
- (action.hashSource?'<button type="button" data-digest="'+esc(action.method)+'">Calculate SHA-256</button>':'')+
- '<small>Review every value before signing.</small><button type="submit" class="primary" data-sign>Sign & verify →</button></div></form></section>';
+ '<div class="actionFooter">'+(action.preset?'<button class="secondary" type="button" data-fill="'+esc(action.method)+'">Use sample data</button>':'')+
+ (action.hashSource?'<button class="secondary" type="button" data-digest="'+esc(action.method)+'">Generate digest</button>':'')+
+ '<small>GENLAYER / SIGNED CALL</small><button type="submit" class="primary" data-sign>Execute & verify <span aria-hidden="true">↗</span></button></div></form></article>';
 }
 function render(){
- document.title=project.name+' · GenLayer Studionet';
- document.documentElement.style.setProperty('--accent',project.id==='reputrail'?'#956d42':'#2a7b76');
+ document.title='REPUTRAIL — Agent trust operations';
+ const queryOptions=project.reads.map((r,i)=>'<option value="'+i+'">'+esc(r[0])+'</option>').join('');
  $('app').innerHTML=
- '<div class="app"><aside class="sidebar"><a class="brand" href="#overview"><span class="logo">'+esc(project.name[0])+'</span><span>'+esc(project.name)+'<small>GENLAYER PROTOCOL</small></span></a>'+
- '<div class="label">WORKSPACE</div><nav class="nav" aria-label="App navigation">'+
- '<button type="button" data-page="overview" class="active">Overview <span>01</span></button>'+
- '<button type="button" data-page="workflow">Workspace <span>02</span></button>'+
- '<button type="button" data-page="explorer">Chain explorer <span>03</span></button></nav>'+
- '<div class="sideFoot"><b>● STUDIONET · 61999</b><div>No mainnet or external identity verification.</div><a href="https://github.com/bearbaba/'+esc(project.name)+'" rel="noopener" target="_blank">Open source ↗</a></div></aside>'+
- '<main><header><span id="breadcrumb">Overview</span><div class="right"><span class="network" id="network">Checking deployment…</span><button class="wallet" id="wallet">Connect wallet</button></div></header>'+
- '<div class="content">'+
- '<section class="page" id="overview"><span class="eyebrow">'+esc(project.eyebrow)+'</span><h1>'+esc(project.hero)+'</h1><p class="lede">'+esc(project.intro)+'</p>'+
- '<div class="buttons"><button class="primary" data-page="workflow">Open workspace →</button><button data-page="explorer">Inspect on-chain state</button></div>'+
- '<div class="stats"><div class="stat"><small>Network</small><strong>Studionet</strong><p>Chain 61999 · test GEN</p></div>'+
- '<div class="stat"><small>Intelligent Contracts</small><strong>02</strong><p>'+esc(project.labels.join(' + '))+'</p></div>'+
- '<div class="stat"><small>Live integration</small><strong id="deployState">CHECKING</strong><p>Source parity requires separate verification</p></div></div>'+
- '<div class="panel"><h2>A complete evidence workflow</h2><p>Signed identities, version-aware permission checks and independent consensus where judgment matters.</p>'+
- '<div class="process">'+project.cards.map(c=>'<article><span>'+esc(c[0])+'</span><strong>'+esc(c[1])+'</strong><p>'+esc(c[2])+'</p></article>').join('')+'</div></div>'+
- '<p class="footnote"><strong>Proof boundary.</strong> '+esc(project.scope)+'</p></section>'+
- '<section class="page" id="workflow" hidden><span class="eyebrow">SIGNED OPERATIONS · WALLET ROLES</span><h1>Work with real contracts.</h1>'+
- '<p class="lede">Follow the cards in order. Switch to the specified signer. Every write waits for GenLayer finality and verifies persisted state before confirmation.</p>'+
- '<div class="notice warning" id="workflowNotice">Contract deployment is required before signing. You can inspect example fields without submitting transactions.</div>'+
- '<div class="gridForms">'+project.forms.map(formHTML).join('')+'</div></section>'+
- '<section class="page" id="explorer" hidden><span class="eyebrow">READ ONLY · LATEST_FINAL</span><h1>Inspect the chain.</h1>'+
- '<p class="lede">Public readback of actual stored contract state. A transaction hash alone never proves successful execution.</p>'+
- '<section class="panel"><h2>Query a record</h2><form id="readForm" class="readForm"><div class="fields">'+
- '<label class="wide">Read method<select id="readMethod">'+project.reads.map((r,i)=>'<option value="'+i+'">'+esc(r[0])+'</option>').join('')+'</select></label>'+
- '<label>ID (when required)<input id="readId" type="number" value="1" min="1" step="1"></label>'+
- '<label>Wallet (when required)<input id="readActor" type="text" placeholder="0x…"></label></div>'+
- '<button type="submit" class="primary">Read LATEST_FINAL →</button></form>'+
- '<pre id="readResult" class="readResult">Choose a query and run readback.</pre></section>'+
- '<p class="footnote">No signatures or wallet connection required for reads. Evidence can be compared to on-chain values and contract source.</p></section></div></main>'+
- '<aside class="activity" aria-live="polite"><div class="eyebrow">TRANSACTION TRACKER</div><h2 id="txTitle" class="txState">Ready to inspect.</h2>'+
- '<p id="txInfo" class="txInfo">Connect the required wallet and choose one action. No transaction has been sent.</p>'+
- '<div id="txHash" class="txHash">No pending transaction</div>'+
- '<div class="txSteps"><div id="phase1">01 · Wallet signature</div><div id="phase2">02 · Finalized execution</div><div id="phase3">03 · State readback</div></div>'+
- '<a id="txLink" target="_blank" rel="noopener" hidden>Open transaction in Explorer ↗</a>'+
- '<button id="retry" hidden>Recheck pending transaction</button>'+
- '<div id="walletIdentity" class="walletIdentity">No wallet selected.</div></aside></div>';
+ '<div class="ops-app"><aside class="ops-sidebar"><a href="#overview" class="ops-brand"><span class="ops-mark">R<span>↗</span></span><span>REPUTRAIL<small>AGENT TRUST NETWORK</small></span></a>'+
+ '<div class="sidebar-caption">OPERATIONS</div><nav class="nav" aria-label="Main navigation">'+
+ '<button type="button" class="active" data-page="overview"><span class="nav-symbol">◫</span> Command center <span class="nav-index">01</span></button>'+
+ '<button type="button" data-page="workflow"><span class="nav-symbol">⤳</span> Case operations <span class="nav-index">02</span></button>'+
+ '<button type="button" data-page="explorer"><span class="nav-symbol">⌁</span> Evidence terminal <span class="nav-index">03</span></button></nav>'+
+ '<div class="sidebar-caption" style="margin-top:38px">PROTOCOL MODULES</div><div class="sidebar-modules"><div><span>SC</span> ServiceCourt <b>ACTIVE SOURCE</b></div><div><span>RL</span> ReputationLedger <b>ACTIVE SOURCE</b></div></div>'+
+ '<div class="sidebar-bottom"><div class="system-indicator"><i></i> GENLAYER STUDIO / 61999</div><p>All displayed outcomes must be verified from final on-chain records.</p><a href="https://github.com/bearbaba/REPUTRAIL" target="_blank" rel="noopener">VIEW SOURCE <span>↗</span></a></div></aside>'+
+ '<div class="ops-workspace"><header class="ops-topbar"><div class="breadcrumb"><span>REPUTRAIL</span><span class="slash">/</span><span id="breadcrumb">Command center</span></div>'+
+ '<div class="top-actions"><span class="network" id="network">Checking contracts…</span><button type="button" class="wallet" id="wallet">Connect operator wallet ↗</button></div></header>'+
+ '<div class="ops-layout"><main class="ops-main">'+
+ '<section class="page" id="overview"><div class="ops-hero"><div class="hero-copy"><div class="eyebrow"><span class="live-pulse"></span> THE ON-CHAIN TRUST LAYER FOR AGENTS</div>'+
+ '<h1>Receipts.<br>Not <em>reputation theater.</em></h1><p>Real service evidence. Independent decisions. No fabricated trust scores. Every agent outcome traces back to a signed case.</p>'+
+ '<div class="buttons"><button class="primary" type="button" data-page="workflow">Open case operations <span aria-hidden="true">↗</span></button><button class="secondary" type="button" data-page="explorer">Inspect records →</button></div></div>'+
+ '<div class="hero-graphic"><div class="scan-head"><span>TRUST PIPELINE / LIVE SCHEMA</span><span>R–61999</span></div>'+
+ '<div class="pulse-diagram"><div class="signal-node signal-a"><small>01 / INPUT</small><b>SIGNED JOB</b><span>Client + agent</span></div>'+
+ '<div class="signal-route"><span></span><span class="route-dot">●</span></div><div class="signal-node signal-b"><small>02 / EVALUATE</small><b>AI CONSENSUS</b><span>Independent validators</span></div>'+
+ '<div class="signal-route"><span></span><span class="route-dot">●</span></div><div class="signal-node signal-c"><small>03 / OUTPUT</small><b>LEDGER EVENT</b><span>Single-use evidence</span></div></div>'+
+ '<div class="scan-foot"><span>ILLUSTRATION / NO LIVE CASE IMPLIED</span><span>INTEGRITY > OPINION</span></div></div></div>'+
+ '<div class="signal-stats"><div class="stat"><small>01 / NETWORK</small><strong>61999</strong><span>GenLayer Studionet</span></div>'+
+ '<div class="stat"><small>02 / CONTRACT STATUS</small><strong id="deployState">CHECKING</strong><span>Source linkage validated separately</span></div>'+
+ '<div class="stat"><small>03 / ON-CHAIN JOBS</small><strong id="liveJobs">—</strong><span>Read from ServiceCourt</span></div>'+
+ '<div class="stat"><small>04 / RECORDED OUTCOMES</small><strong id="liveOutcomes">—</strong><span>Read from ReputationLedger</span></div></div>'+
+ '<section class="caseboard"><div class="caseboard-title"><div><div class="eyebrow">SERVICE INTEGRITY / WORKFLOW</div><h2>Inside the evidence trail</h2></div><span class="read-only-pill">DESIGN REFERENCE</span></div>'+
+ '<div class="case-lanes"><article><small>PHASE 01</small><div class="lane-icon">↗</div><h3>Commit</h3><p>Client signs the job terms; agent signs the exact output and its digest.</p><span class="lane-foot">IMMUTABLE INPUT</span></article>'+
+ '<article><small>PHASE 02</small><div class="lane-icon">≋</div><h3>Contest</h3><p>The client can accept delivery or freeze a concrete dispute for consensus.</p><span class="lane-foot">DISPUTE / ACCEPT</span></article>'+
+ '<article><small>PHASE 03</small><div class="lane-icon">◎</div><h3>Resolve</h3><p>Independent validators reach a bounded verdict using the supplied evidence.</p><span class="lane-foot">CONSENSUS REQUIRED</span></article>'+
+ '<article><small>PHASE 04</small><div class="lane-icon">▣</div><h3>Record</h3><p>One eligible outcome updates transparent counts. No automatic AI score.</p><span class="lane-foot">ONE EVENT PER JOB</span></article></div></section>'+
+ '<div class="boundary-note"><strong>DATA BOUNDARY //</strong><p>'+esc(project.scope)+'</p></div></section>'+
+ '<section class="page" id="workflow" hidden><div class="workflow-heading"><div class="eyebrow">CASE OPERATIONS / SIGNED WRITES</div><h1>From claim<br>to <span>accountability.</span></h1><p>Each panel operates on real contract methods. Select the correct wallet role and verify persisted final-state evidence before continuing.</p></div>'+
+ '<div class="notice warning" id="workflowNotice">Checking deployed contract configuration…</div>'+
+ '<div class="operation-group"><div class="group-header"><div class="group-numb">A / 01</div><div><h2>Intake & delivery</h2><p>Lock the terms of service, then collect the agent\'s signed artifact.</p></div></div>'+
+ '<div class="gridForms">'+project.forms.slice(0,2).map(formHTML).join('')+'</div></div>'+
+ '<div class="operation-group"><div class="group-header"><div class="group-numb alert">B / 02</div><div><h2>Dispute & resolution</h2><p>Record a claim, obtain consensus, or accept an undisputed delivery.</p></div></div>'+
+ '<div class="gridForms">'+project.forms.slice(2).map(formHTML).join('')+'</div></div></section>'+
+ '<section class="page" id="explorer" hidden><div class="terminal-heading"><div class="eyebrow">READONLY / GENLAYER LATEST_FINAL</div><h1>Evidence<br><span>terminal.</span></h1><p>Read actual jobs, outcomes and agent profiles from the chain. No wallet signature is required.</p></div>'+
+ '<div class="terminal-card"><div class="terminal-bar"><span><i></i> CHAIN QUERY CONSOLE</span><span>RPC / STUDIONET</span></div>'+
+ '<div class="terminal-content"><form id="readForm" class="readForm"><div class="fields"><label class="wide">Choose a query<select id="readMethod">'+queryOptions+'</select></label>'+
+ '<label>Case / record ID<input id="readId" type="number" value="1" min="1" step="1"></label><label>Wallet address<input id="readActor" type="text" placeholder="0x…"></label></div>'+
+ '<button class="primary" type="submit">Run on-chain read ↗</button></form>'+
+ '<div class="json-head"><span>RETURN DATA</span><span>FINALIZED VIEW</span></div><pre id="readResult" class="readResult">{"status":"awaiting query"}</pre></div></div></section>'+
+ '</main><aside class="activity" aria-live="polite"><div class="activity-kicker"><span class="live-pulse"></span> TRANSACTION OBSERVABILITY</div>'+
+ '<h2 id="txTitle" class="txState">Standing by.</h2><p id="txInfo" class="txInfo">No signed transaction yet. Connect your wallet to operate a case.</p>'+
+ '<div class="txSteps"><div id="phase1">01 <span>WALLET SIGNATURE</span></div><div id="phase2">02 <span>FINALIZED EXECUTION</span></div><div id="phase3">03 <span>STATE VERIFICATION</span></div></div>'+
+ '<div class="txHashLabel">LAST TRANSACTION</div><div id="txHash" class="txHash">No pending transaction</div>'+
+ '<a id="txLink" rel="noopener" target="_blank" hidden>Open explorer receipt ↗</a>'+
+ '<button id="retry" type="button" hidden>Recheck pending transaction</button><div id="walletIdentity" class="walletIdentity">No wallet selected.</div>'+
+ '<div class="integrity-card"><span>✧</span><b>Evidence first.</b><p>Finalized is not successful unless GenVM succeeds and the stored result matches.</p></div></aside></div></div></div>';
  bind();
 }
 function notice(title,info,phase=0,hash=''){
@@ -104,7 +117,7 @@ function bind(){
  };
  for(const button of document.querySelectorAll('[data-digest]'))button.onclick=async()=>{
   try{const m=button.dataset.digest,a=project.forms.find(x=>x.method===m);
-   const text=$('f_'+m+'_'+a.hashSource).value;
+   const text=$('f_'+m+'_'+a.hashSource).value.trim();
    if(!text)throw Error('Enter the exact evidence or delivery content first');
    const field=a.fields.find(x=>x[2]==='hash');
    $('f_'+m+'_'+field[0]).value=await sha256(text);
@@ -326,7 +339,11 @@ async function init(){
   const json=await response.json();
   if(!response.ok||!json.ok)throw Error('Configuration endpoint unavailable');
   config=json;
-  $('deployState').textContent=json.configured?'CONFIGURED':'NOT DEPLOYED';
+  if(json.configured){try{const [jobs,outcomes]=await Promise.all([api('first','stats'),api('second','stats')]);
+   if(Number.isSafeInteger(jobs.jobs))$('liveJobs').textContent=String(jobs.jobs);
+   if(Number.isSafeInteger(outcomes.outcomes))$('liveOutcomes').textContent=String(outcomes.outcomes);
+  }catch{ /* Leave metrics unknown if read unavailable. */ }}
+  $('deployState').textContent=json.configured?'ONLINE':'NOT DEPLOYED';
   $('network').textContent=json.configured?'Studionet · addresses configured':'Studionet · deployment required';
   $('workflowNotice').textContent=json.configured?
    'Two contract addresses are configured. Verify deployed source and constructor binding before signing.':
