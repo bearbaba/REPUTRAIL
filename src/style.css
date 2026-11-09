@@ -28,3 +28,56 @@ input,textarea,select{width:100%;min-width:0;background:#0c1923;border:1px solid
 @media(max-width:1080px){.ops-layout{display:block}.activity{position:relative;height:auto;min-height:0;border-left:0;border-top:1px solid #30414b;padding:26px}.integrity-card{margin-top:20px}.txState{margin:20px 0 10px}.txSteps{grid-template-columns:repeat(3,1fr)}.ops-hero{grid-template-columns:1fr 1fr}.case-lanes{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){.ops-app{display:block}.ops-sidebar{height:auto;position:relative;padding:15px 14px}.ops-brand{margin:0 0 12px}.ops-sidebar .sidebar-caption,.sidebar-modules,.sidebar-bottom{display:none}.nav{display:flex;gap:5px;overflow:auto}.nav button{min-width:fit-content;padding:10px 7px;gap:5px;font-size:10px}.nav-symbol{font-size:14px;width:16px}.nav-index{display:none}.ops-topbar{height:auto;min-height:66px;padding:13px 16px;flex-wrap:wrap}.top-actions{margin-left:auto}.network{display:none}.wallet{font-size:10px}.ops-main{padding:25px 14px 55px}.ops-hero{grid-template-columns:1fr}.hero-copy h1{font-size:48px}.hero-graphic{height:277px}.signal-stats{grid-template-columns:repeat(2,1fr)}.stat{min-height:105px}.caseboard-title h2{font-size:22px}.case-lanes{grid-template-columns:1fr}.case-lanes article{min-height:auto}.lane-icon{margin:12px 0}.boundary-note{grid-template-columns:1fr}.operation-group{margin:25px 0}.action{padding:18px}.actionTop{flex-wrap:wrap}.role{margin-left:42px}.fields{grid-template-columns:1fr}.actionFooter button{width:100%}.actionFooter .primary{margin-left:0}.workflow-heading h1,.terminal-heading h1{font-size:44px}.terminal-content{padding:15px}.txSteps{grid-template-columns:1fr}.activity{padding:20px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Operator console: REPUTRAIL remains a dark agent-operations interface.
+   Only one signed method is shown at a time; no permanently expanded form list. */
+.ops-layout{grid-template-columns:minmax(0,1fr)}
+.ops-main{max-width:1510px;width:100%;margin-inline:auto}
+.case-gate{display:flex;align-items:center;gap:22px;max-width:1050px;padding:30px 32px;margin-top:24px;background:#14232c;border:1px solid #314451;border-radius:10px}
+.gate-mark{font:700 42px 'Space Grotesk',sans-serif;color:#d6f47b;background:#253a30;border:1px solid #486343;width:65px;height:65px;display:grid;place-items:center;border-radius:10px}
+.case-gate>div{flex:1}.case-gate h2{margin:0 0 6px;font:700 25px 'Space Grotesk',sans-serif}.case-gate p{margin:0;color:#91a5aa;font-size:12px;line-height:1.8;max-width:560px}
+.case-gate>button{white-space:nowrap}
+.case-console{margin-top:20px}
+.case-signer{border:1px solid #3b5b45;border-radius:7px;background:#1a2a28;color:#c0e59d;font:600 10px var(--mono);padding:12px 15px;margin-bottom:14px;overflow-wrap:anywhere}
+.case-message{background:#19323b;border:1px solid #356372;color:#aee0ee;border-radius:6px;padding:12px 15px;font-size:11px;line-height:1.7;margin:12px 0}
+.case-message.error{background:#382722;border-color:#8a513f;color:#ffc2a7}
+.case-workspace{display:grid;grid-template-columns:minmax(215px,270px) minmax(0,1fr);gap:15px;max-width:1230px}
+.case-tablist{display:flex;flex-direction:column;gap:5px;background:#111d27;border:1px solid #293e49;border-radius:8px;padding:11px;align-self:start}
+.case-tablist button{display:grid;grid-template-columns:33px minmax(0,1fr);gap:12px;align-items:center;text-align:left;border:1px solid transparent;background:transparent;border-radius:5px;color:#9bb0b8;padding:13px 11px}
+.case-tablist button:hover{background:#21313b}
+.case-tablist button.active{background:#24372e;border-color:#4d6d48;color:#e6f9cc}
+.case-tab-index{width:31px;height:31px;border:1px solid #334b53;border-radius:5px;display:grid;place-items:center;color:#91abac;font:700 11px var(--mono)}
+.case-tablist button.active .case-tab-index{border-color:#d6f47b;background:#d6f47b;color:#182921}
+.case-tablist button strong{display:block;font-size:11px;line-height:1.5}
+.case-tablist button small{display:block;color:#7796a1;font:500 9px var(--mono);margin-top:3px}
+.case-work-panel{min-width:0;border:1px solid #2e4350;border-radius:8px;background:#14212c;overflow:hidden}
+.case-work-head{display:flex;justify-content:space-between;gap:12px;padding:16px 21px;border-bottom:1px solid #2c414c;color:#93a8a9;font:650 9px var(--mono);letter-spacing:.06em}
+#caseMode{color:#d2ed97}
+.case-form-panel .action{border:0;border-radius:0;box-shadow:none;padding:25px 24px 27px;background:transparent}
+.case-form-panel .actionFooter{margin-top:18px}
+.case-form-panel .action h2{font-size:22px}
+.case-form-panel textarea{min-height:82px}
+.case-form-panel .actionTop{gap:15px}
+.case-form-panel .actionFooter small{color:#8099a2;font-size:10px}
+@media(max-width:930px){.case-workspace{grid-template-columns:205px minmax(0,1fr)}.case-gate{flex-wrap:wrap}.case-gate>button{margin-left:85px}}
+@media(max-width:700px){.case-workspace{grid-template-columns:1fr}.case-tablist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.case-tablist button{padding:10px;gap:7px;grid-template-columns:28px minmax(0,1fr)}.case-tab-index{width:26px;height:26px}.case-work-head{padding:12px}.case-form-panel .action{padding:19px 15px}.case-gate{padding:20px;gap:15px}.gate-mark{height:45px;width:45px;font-size:30px}.case-gate h2{font-size:21px}.case-gate>button{margin:0;width:100%}}
+/* No idle side panel. Contextual transaction notification appears only during signing. */
+.activity[hidden]{display:none!important}
+.activity{position:fixed;z-index:25;top:auto;left:auto;bottom:20px;right:20px;width:min(355px,calc(100vw - 40px));height:auto;min-height:0;max-height:70vh;overflow:auto;display:block;background:#12212d;border:1px solid #54765b;border-radius:10px;padding:20px 22px;box-shadow:0 20px 65px #050d15bf}
+.activity-kicker{display:flex;align-items:center;gap:7px}
+#txClose{margin-left:auto;padding:2px 8px;border:0;background:transparent;color:#b3c2c0;font-size:23px;line-height:1}
+#txClose:hover{color:#fff;background:#263945}
+.activity .txState{margin:14px 0 8px;font-size:19px}
+.activity .txInfo{font-size:11px;line-height:1.65}
+.tx-state-line{display:flex;align-items:center;gap:11px}
+.tx-spinner{display:block;flex:none;width:15px;height:15px;border:2px solid #657b65;border-top-color:#d6f47b;border-radius:100%;animation:reputrail-spin .9s linear infinite}
+.tx-spinner[hidden]{display:none!important}
+@keyframes reputrail-spin{to{transform:rotate(360deg)}}
+.activity .txHash{padding:9px;font-size:9px;overflow-wrap:anywhere}
+.activity[data-tx-state="success"]{border-color:#a9d777}
+.activity[data-tx-state="success"] .txState{color:#d6f47b}
+.activity[data-tx-state="error"]{border-color:#db936b}
+.activity[data-tx-state="error"] .txState{color:#ffad81}
+.activity #retry{margin:12px 0 0}
+.activity .walletIdentity{margin:0}
+@media(max-width:700px){.activity{bottom:11px;left:11px;right:11px;width:auto;max-height:60vh}}
