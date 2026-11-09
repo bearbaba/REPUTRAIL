@@ -64,14 +64,14 @@ function render(){
  '<article><small>PHASE 02</small><div class="lane-icon">≋</div><h3>Contest</h3><p>The client can accept delivery or freeze a concrete dispute for consensus.</p><span class="lane-foot">DISPUTE / ACCEPT</span></article>'+
  '<article><small>PHASE 03</small><div class="lane-icon">◎</div><h3>Resolve</h3><p>Independent validators reach a bounded verdict using the supplied evidence.</p><span class="lane-foot">CONSENSUS REQUIRED</span></article>'+
  '<article><small>PHASE 04</small><div class="lane-icon">▣</div><h3>Record</h3><p>One eligible outcome updates transparent counts. No automatic AI score.</p><span class="lane-foot">ONE EVENT PER JOB</span></article></div></section>'+
- '<div class '<div class="case-gate" id="caseGate"><span class="gate-mark">↗</span><div><h2>Connect to operate</h2><p>Use an operator wallet on GenLayer Studionet to create and resolve signed cases. Public evidence reads are available without connecting.</p></div><button class="primary" type="button" id="caseConnect">Connect operator wallet ↗</button></div>'+
- '<div id="caseConsole" class="case-console" hidden><div id="caseSigner" class="case-signer">No operator connected</div><div id="caseMessage" class="case-message" role="status" hidden></div>'+
+ '<div class="boundary-note"><strong>DATA BOUNDARY //</strong><p>'+esc(project.scope)+'</p></div></section>'+
+ '<section class="page" id="workflow" hidden><div class="workflow-heading"><div class="eyebrow">CASE OPERATIONS / SIGNED WRITES</div><h1>From claim<br>to <span>accountability.</span></h1><p>One signed operation at a time. Verify the final on-chain result before proceeding.</p></div>'+
+ '<div id="workflowNotice" class="notice warning">Checking deployed contract configuration…</div>'+
+ '<div id="caseMessage" class="case-message" role="status" hidden></div>'+
+ '<div class="case-gate" id="caseGate"><span class="gate-mark">↗</span><div><h2>Connect to operate</h2><p>Use a wallet on GenLayer Studionet to create and resolve signed cases. Public evidence reads do not require a wallet.</p></div><button class="primary" type="button" id="caseConnect">Connect operator wallet ↗</button></div>'+
+ '<div id="caseConsole" class="case-console" hidden><div id="caseSigner" class="case-signer">No operator connected</div>'+
  '<div class="case-workspace"><nav class="case-tablist" role="tablist" aria-label="Case operations">'+methodTabs+'</nav>'+
  '<div class="case-work-panel"><div class="case-work-head"><span>CONTRACT OPERATIONS / STUDIONET</span><span id="caseMode">SELECT OPERATION</span></div>'+methodPanels+'</div></div></div></section>'+
-div><div><h2>Intake & delivery</h2><p>Lock the terms of service, then collect the agent\'s signed artifact.</p></div></div>'+
- '<div class="gridForms">'+project.forms.slice(0,2).map(formHTML).join('')+'</div></div>'+
- '<div class="operation-group"><div class="group-header"><div class="group-numb alert">B / 02</div><div><h2>Dispute & resolution</h2><p>Record a claim, obtain consensus, or accept an undisputed delivery.</p></div></div>'+
- '<div class="gridForms">'+project.forms.slice(2).map(formHTML).join('')+'</div></div></section>'+
  '<section class="page" id="explorer" hidden><div class="terminal-heading"><div class="eyebrow">READONLY / GENLAYER LATEST_FINAL</div><h1>Evidence<br><span>terminal.</span></h1><p>Read actual jobs, outcomes and agent profiles from the chain. No wallet signature is required.</p></div>'+
  '<div class="terminal-card"><div class="terminal-bar"><span><i></i> CHAIN QUERY CONSOLE</span><span>RPC / STUDIONET</span></div>'+
  '<div class="terminal-content"><form id="readForm" class="readForm"><div class="fields"><label class="wide">Choose a query<select id="readMethod">'+queryOptions+'</select></label>'+
