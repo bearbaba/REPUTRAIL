@@ -78,3 +78,15 @@ The signed client claim was:
 An independent `LATEST_FINAL` read of `get_job(1)` confirmed `stage=DISPUTED`, `verdict=PENDING`, unchanged `client` and `agent` addresses, the exact stored client claim, and the previously signed delivery and hashes. `ServiceCourt.stats().jobs=1`.
 
 **Proof boundary:** This records a client-signed dispute and intact disputed facts; the AI Consensus judgment and any ledger reputation outcome remain unobserved at this stage.
+
+
+## Job #1 post-adjudication readback (transaction hash to be linked)
+
+The public `LATEST_FINAL` state of `ServiceCourt.get_job(1)` was queried after the user observed a pre-signing message that the job was no longer awaiting adjudication. Readback returned:
+
+- `id=1`, `stage=DECIDED`, `verdict=AGENT_AT_FAULT`
+- The persisted agent delivery remains `approvedTotal=27`; the frozen agreement requires `approvedTotal=20`
+- `reputation_permission(1).allowed=true`, with the original `agreement_sha256=7b92cc561473808a68c17bf6c97912e733b0423e1a1a5f0edc474dd208ce9ab8` and `delivery_sha256=7cfe8dbf70a9f3a9a82a32aeeea81ade23683458ebe1b560f8bdedfebe4f6897`
+- `ReputationLedger.stats().outcomes=0`; `outcome_for(1)` returned no record.
+
+**Evidence boundary:** This is a verifiable finalized **contract-state observation**, not a claimed, verified adjudication transaction receipt. The `adjudicate(1)` transaction hash has not been attached, so the individual signer, nonce and transaction consensus record are not separately asserted here. The case is eligible for a distinct ledger recording transaction, which has not yet been observed.
