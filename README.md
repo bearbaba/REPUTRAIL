@@ -1,50 +1,26 @@
-# REPUTRAIL — Proof-carrying agent service reputation
+# REPUTRAIL
 
-**REPUTRAIL records evidence-linked service outcomes instead of asking an AI to invent a reputation score. Signed jobs can be accepted directly by clients or disputed and settled by independent GenLayer consensus. A second contract maintains event counts per agent.**
+**Evidence-linked service reputation for wallet-identified agents on GenLayer.**
 
-> **State:** Source implementation and offline tests are available. **No Studionet deployment, on-chain acceptance or website production verification is claimed yet.** The application disables signing until two real contract addresses are configured.
+REPUTRAIL separates a signed service job, its delivered evidence, and the eventual service outcome. GenLayer AI consensus evaluates contested outcomes based on the frozen agreement and supplied records. A second contract records discrete, non-duplicable reputation events rather than inventing an AI-generated score.
 
-## Workflow
+## System architecture
 
-1. Client signs `open_job` with a specific measurable agreement and reference fixture.
-2. Agent wallet signs `submit_delivery` with exact SHA-256.
-3. Client either signs `accept_delivery`, or signs `open_dispute` with a concrete claim.
-4. After a dispute, GenLayer `adjudicate` determines fault, unsupported claim or uncertainty.
-5. `record_outcome` stores an eligible event once and increments transparent agent counters in `ReputationLedger`.
+- **ServiceCourt** — client- and agent-wallet roles, immutable job specifications and reference data, SHA-256-linked deliverables, direct client acceptance, and `AGENT_AT_FAULT` / `CLAIM_UNSUPPORTED` / `REVIEW_REQUIRED` dispute decisions.
+- **ReputationLedger** — bound Court authorization, one outcome per job, append-only event records, and count-based agent profiles.
+- **Web application** — responsive job and dispute interfaces, EIP-1193 wallet signing, transaction status, and public profile inspection.
+- **Read API** — allowlisted contract reads with explicit finalized-state semantics.
+- **Verification code** — deterministic checks, source schema validation, and CI.
 
-## Architecture
+## Technical boundaries
 
-- ServiceCourt: client-signed immutable agreement and reference fixture; distinct agent wallet signs a hash-linked delivery; client may accept directly or open a dispute; GenLayer independently returns AGENT_AT_FAULT, CLAIM_UNSUPPORTED or REVIEW_REQUIRED based only on frozen evidence.
-- ReputationLedger: permissionless recording of eligible finalized outcomes from the bound Court. Each job records at most once, updating transparent counters for client acceptance, proven faults and unsupported claims. REVIEW_REQUIRED never mutates reputation.
+The network target is GenLayer Studionet (**61999**). **No contract deployment, signed on-chain acceptance, or production website availability is claimed yet.** The web application does not enable writes without configured deployed addresses.
 
-The browser interface uses EIP-1193 wallet signing with GenLayer's JavaScript client. The public serverless read API exposes an allowlist and uses `LATEST_FINAL`; the transaction tracker separately checks `FINALIZED`, GenVM `SUCCESS` and persisted state before reporting verified execution. Incomplete transactions remain stored for manual recheck, preventing duplicate submission attempts.
+A signing wallet identifies a participant within this application; it does not independently attest to an autonomous AI agent or real-world organization. Client acceptance is an explicit client decision. AI verdicts are limited to the provided signed evidence.
 
-## Security and acceptance scenarios
+## Source
 
-**Positive:** Client accepts or AI adjudicates a proven fault → a single evidence-linked ledger event increments the appropriate counter.
-
-**Negative:** Unsigned/wrong-signer submission rejected, bad digest rejected, REVIEW_REQUIRED cannot enter reputation, same job cannot be counted twice, validator disagreement preserves dispute.
-
-Tests are deterministic and mock GenLayer consensus; they are not substitutes for signed validator acceptance. The source includes no private keys, wallet seeds or assumed API secrets.
-
-## Reproduce locally
-
-Node.js >=22, Python >=3.11:
-
-```bash
-npm install
-npm test
-npm run build
-python -m unittest discover -s tests -v
-python -m py_compile contracts/*.py
-```
-
-For local UI, `npm run dev`. On Vercel, set `SERVICE_COURT_ADDRESS` and `REPUTATION_LEDGER_ADDRESS` only after deploying the two real contracts and verifying the constructor linkage. The local Vite development server does not expose Vercel serverless APIs; use the deployed serverless environment for on-chain read/sign workflows.
-
-[Deployment procedure](docs/DEPLOYMENT.md) · [Studio verification checklist](docs/STUDIO_TESTS.md) · [Source: first contract](contracts/service_court.py) · [Source: second contract](contracts/reputation_ledger.py)
-
-## Boundaries
-
-Agent identity is a signing wallet rather than proof of external autonomous operation. Client acceptance is an explicit client claim; AI conflict results use only the signed task, reference and delivery. Reputation counts are recorded events, not a financial credit score or verified real-world service history.
-
-Everything in this repository concerns product behavior, source code, reproducible tests and technical evidence.
+- [ServiceCourt](contracts/service_court.py)
+- [ReputationLedger](contracts/reputation_ledger.py)
+- [Web application](src/main.js)
+- [Verification logic](lib/verification.js)
