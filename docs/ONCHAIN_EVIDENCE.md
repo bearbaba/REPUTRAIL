@@ -1,0 +1,38 @@
+# REPUTRAIL — Verified GenLayer Studionet evidence
+
+**Chain:** GenLayer Studionet (61999)  
+**Verification:** independent public transaction receipt and `LATEST_FINAL` contract reads. This document records observed signed activity; it does not assert an unobserved end-to-end outcome.
+
+## Deployed contracts
+
+| Component | Address |
+| --- | --- |
+| ServiceCourt | [`0xD64b7cb41416BefA082f753EC762095d61607457`](https://explorer-studio.genlayer.com/address/0xD64b7cb41416BefA082f753EC762095d61607457) |
+| ReputationLedger | [`0x30eaf3F2f0482D4120113aD177e9359fdBe82376`](https://explorer-studio.genlayer.com/address/0x30eaf3F2f0482D4120113aD177e9359fdBe82376) |
+
+The read-only deployed-source and constructor-binding verification is available in the repository's `verify-studionet.yml` GitHub Actions workflow. The registry's on-chain `stats().court` points to the ServiceCourt above.
+
+## Signed execution — Service Job #1
+
+| Field | Observed value |
+| --- | --- |
+| Method | `ServiceCourt.open_job(agent,agreement,reference_input)` |
+| Transaction | [`0x6f844f8ca9e6a0e62b62bdbf05d2524cdde3c9d1254492fdb162a61eede91460`](https://explorer-studio.genlayer.com/tx/0x6f844f8ca9e6a0e62b62bdbf05d2524cdde3c9d1254492fdb162a61eede91460) |
+| Client / signer | `0x4C7cb73aC8F8999af21cfc9fF4cF2333a9508Dcb` |
+| Assigned agent | `0xD6b8A3A5eB329410D9504784812b8569afA8C2aF` |
+| Contract | `0xD64b7cb41416BefA082f753EC762095d61607457` |
+| Result | `FINALIZED`, GenVM `SUCCESS`, consensus `Accepted` |
+| Return value | Job ID `1` |
+
+The frozen agreement requires a JSON report listing the approved invoice IDs with `approvedTotal=20`, derived from two approved invoices `INV-1=12` and `INV-3=8`; `INV-2=7` is excluded.
+
+Independent `LATEST_FINAL` readback of `ServiceCourt.get_job(1)` confirmed:
+
+- `id=1`, `stage=OPEN`, `verdict=PENDING`.
+- `client=0x4c7cb73ac8f8999af21cfc9ff4cf2333a9508dcb`, `agent=0xd6b8a3a5eb329410d9504784812b8569afa8c2af`.
+- `agreement_sha256=7b92cc561473808a68c17bf6c97912e733b0423e1a1a5f0edc474dd208ce9ab8`.
+- `reference_sha256=29ffb6f8372c85575c9f1bb4a1d11408f86c458b9c6102f7fad106c4d8656544`.
+- No delivery, claim or verdict was yet recorded.
+- `ServiceCourt.stats().jobs=1`; `ReputationLedger.stats().outcomes=0`.
+
+**Proof boundary:** This transaction proves one client-signed service job was created with a fixed agreement and an assigned agent. It does not yet establish delivery, dispute adjudication, AI consensus verdict, or a recorded reputation event.
