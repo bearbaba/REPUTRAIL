@@ -32,3 +32,17 @@ test('static DOM references have mount points',()=>{
  const ids=[...new Set([...ui.matchAll(/\$\('([A-Za-z][\w-]*)'\)/g)].map(m=>m[1]))];
  for(const id of ids)assert.ok(all.includes('id="'+id+'"'),'missing element: #'+id);
 });
+
+
+test('transactions page supports import and automatic signed-hash journaling',()=>{
+ assert.match(ui,/data-page="transactions"/);
+ assert.match(ui,/id="transactions" hidden/);
+ assert.match(ui,/id="importHistory"/);
+ assert.match(ui,/function renderHistory\(\)/);
+ assert.match(ui,/function checkHistoryHash\(hash\)/);
+ assert.match(ui,/rec\.hash=hash;savePending\(rec\);rememberWrite\(rec\)/);
+ assert.match(ui,/rememberWrite\(rec,'verified'\)/);
+ assert.match(ui,/rememberWrite\(rec,'error'\)/);
+ assert.match(ui,/rememberWrite\(rec,'state-unverified'\)/);
+ assert.match(ui,/id="txHistoryList"/);
+});
