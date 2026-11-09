@@ -32,6 +32,9 @@ function formHTML(action){
 }
 function render(){
  document.title='REPUTRAIL — Agent trust operations';
+
+ const methodTabs=project.forms.map((a,i)=>'<button type="button" data-case-tab="'+esc(a.method)+'" role="tab" aria-selected="false" aria-controls="case_'+esc(a.method)+'"><span class="case-tab-index">'+String(i+1).padStart(2,'0')+'</span><span><strong>'+esc(a.title)+'</strong><small>'+esc(a.role)+'</small></span></button>').join('');
+ const methodPanels=project.forms.map(a=>'<section class="case-form-panel" id="case_'+esc(a.method)+'" data-case-panel="'+esc(a.method)+'" role="tabpanel" hidden>'+formHTML(a)+'</section>').join('');
  const queryOptions=project.reads.map((r,i)=>'<option value="'+i+'">'+esc(r[0])+'</option>').join('');
  $('app').innerHTML=
  '<div class="ops-app"><aside class="ops-sidebar"><a href="#overview" class="ops-brand"><span class="ops-mark">R<span>↗</span></span><span>REPUTRAIL<small>AGENT TRUST NETWORK</small></span></a>'+
@@ -61,10 +64,11 @@ function render(){
  '<article><small>PHASE 02</small><div class="lane-icon">≋</div><h3>Contest</h3><p>The client can accept delivery or freeze a concrete dispute for consensus.</p><span class="lane-foot">DISPUTE / ACCEPT</span></article>'+
  '<article><small>PHASE 03</small><div class="lane-icon">◎</div><h3>Resolve</h3><p>Independent validators reach a bounded verdict using the supplied evidence.</p><span class="lane-foot">CONSENSUS REQUIRED</span></article>'+
  '<article><small>PHASE 04</small><div class="lane-icon">▣</div><h3>Record</h3><p>One eligible outcome updates transparent counts. No automatic AI score.</p><span class="lane-foot">ONE EVENT PER JOB</span></article></div></section>'+
- '<div class="boundary-note"><strong>DATA BOUNDARY //</strong><p>'+esc(project.scope)+'</p></div></section>'+
- '<section class="page" id="workflow" hidden><div class="workflow-heading"><div class="eyebrow">CASE OPERATIONS / SIGNED WRITES</div><h1>From claim<br>to <span>accountability.</span></h1><p>Each panel operates on real contract methods. Select the correct wallet role and verify persisted final-state evidence before continuing.</p></div>'+
- '<div class="notice warning" id="workflowNotice">Checking deployed contract configuration…</div>'+
- '<div class="operation-group"><div class="group-header"><div class="group-numb">A / 01</div><div><h2>Intake & delivery</h2><p>Lock the terms of service, then collect the agent\'s signed artifact.</p></div></div>'+
+ '<div class '<div class="case-gate" id="caseGate"><span class="gate-mark">↗</span><div><h2>Connect to operate</h2><p>Use an operator wallet on GenLayer Studionet to create and resolve signed cases. Public evidence reads are available without connecting.</p></div><button class="primary" type="button" id="caseConnect">Connect operator wallet ↗</button></div>'+
+ '<div id="caseConsole" class="case-console" hidden><div id="caseSigner" class="case-signer">No operator connected</div><div id="caseMessage" class="case-message" role="status" hidden></div>'+
+ '<div class="case-workspace"><nav class="case-tablist" role="tablist" aria-label="Case operations">'+methodTabs+'</nav>'+
+ '<div class="case-work-panel"><div class="case-work-head"><span>CONTRACT OPERATIONS / STUDIONET</span><span id="caseMode">SELECT OPERATION</span></div>'+methodPanels+'</div></div></div></section>'+
+div><div><h2>Intake & delivery</h2><p>Lock the terms of service, then collect the agent\'s signed artifact.</p></div></div>'+
  '<div class="gridForms">'+project.forms.slice(0,2).map(formHTML).join('')+'</div></div>'+
  '<div class="operation-group"><div class="group-header"><div class="group-numb alert">B / 02</div><div><h2>Dispute & resolution</h2><p>Record a claim, obtain consensus, or accept an undisputed delivery.</p></div></div>'+
  '<div class="gridForms">'+project.forms.slice(2).map(formHTML).join('')+'</div></div></section>'+
@@ -74,20 +78,51 @@ function render(){
  '<label>Case / record ID<input id="readId" type="number" value="1" min="1" step="1"></label><label>Wallet address<input id="readActor" type="text" placeholder="0x…"></label></div>'+
  '<button class="primary" type="submit">Run on-chain read ↗</button></form>'+
  '<div class="json-head"><span>RETURN DATA</span><span>FINALIZED VIEW</span></div><pre id="readResult" class="readResult">{"status":"awaiting query"}</pre></div></div></section>'+
- '</main><aside class="activity" aria-live="polite"><div class="activity-kicker"><span class="live-pulse"></span> TRANSACTION OBSERVABILITY</div>'+
- '<h2 id="txTitle" class="txState">Standing by.</h2><p id="txInfo" class="txInfo">No signed transaction yet. Connect your wallet to operate a case.</p>'+
- '<div class="txSteps"><div id="phase1">01 <span>WALLET SIGNATURE</span></div><div id="phase2">02 <span>FINALIZED EXECUTION</span></div><div id="phase3">03 <span>STATE VERIFICATION</span></div></div>'+
- '<div class="txHashLabel">LAST TRANSACTION</div><div id="txHash" class="txHash">No pending transaction</div>'+
- '<a id="txLink" rel="noopener" target="_blank" hidden>Open explorer receipt ↗</a>'+
- '<button id="retry" type="button" hidden>Recheck pending transaction</button><div id="walletIdentity" class="walletIdentity">No wallet selected.</div>'+
- '<div class="integrity-card"><span>✧</span><b>Evidence first.</b><p>Finalized is not successful unless GenVM succeeds and the stored result matches.</p></div></aside></div></div></div>';
+ '</main><aside class="activity" id="txPanel" role="status" aria-live="polite" hidden><div class="activity-kicker"><span class="live-pulse"></span> LIVE TRANSACTION <button type="button" id="txClose" aria-label="Close transaction notification">×</button></div>'+
+ '<div class="tx-state-line"><span id="txSpinner" class="tx-spinner" hidden></span><h2 id="txTitle" class="txState">Waiting for wallet</h2></div><p id="txInfo" class="txInfo">No transaction signed yet.</p>'+
+ '<div class="txHashLabel" id="txHashLabel" hidden>TRANSACTION HASH</div><div id="txHash" class="txHash" hidden></div>'+
+ '<a id="txLink" rel="noopener" target="_blank" hidden>View on Explorer ↗</a>'+
+ '<button id="retry" type="button" hidden>Recheck transaction</button><div id="walletIdentity" class="walletIdentity" hidden></div></aside></div></div></div>';
  bind();
 }
-function notice(title,info,phase=0,hash=''){
+let chosenAction='open_job',txDismiss=null,txToken=0;
+const ACTION_LABELS={open_job:'Open job',submit_delivery:'Submit delivery',open_dispute:'Open dispute',adjudicate:'AI adjudication',accept_delivery:'Accept delivery',record_outcome:'Record outcome'};
+const actionLabel=m=>ACTION_LABELS[m]||m.replaceAll('_',' ');
+function workspaceMessage(message,error=false){
+ const target=$('caseMessage');if(!target)return;
+ target.textContent=String(message);target.hidden=false;
+ target.className='case-message'+(error?' error':'');
+}
+function clearWorkspaceMessage(){const target=$('caseMessage');if(target){target.textContent='';target.hidden=true}}
+function dismissTx(){if(txDismiss)clearTimeout(txDismiss);txDismiss=null;txToken++;$('txPanel').hidden=true}
+function notice(title,info,phase=0,hash='',state='pending'){
+ if(txDismiss)clearTimeout(txDismiss);
+ txDismiss=null;const token=++txToken;
+ $('txPanel').hidden=false;$('txPanel').dataset.txState=state;
  $('txTitle').textContent=title;$('txInfo').textContent=info;
- $('txHash').textContent=hash||'No pending transaction';
+ $('txSpinner').hidden=state!=='pending';
+ $('txHash').hidden=!hash;$('txHashLabel').hidden=!hash;
+ if(hash)$('txHash').textContent=hash;
  $('txLink').hidden=!hash;if(hash)$('txLink').href=txPrefix+encodeURIComponent(hash);
- for(let i=1;i<=3;i++)$('phase'+i).className=i<phase?'done':i===phase?'current':'';
+ if(['success','error','cancelled'].includes(state))txDismiss=setTimeout(()=>{
+  if(txToken===token&&!checking&&!loadPending())dismissTx()
+ },9000);
+}
+function pickCase(method){
+ if(!project.forms.some(f=>f.method===method))return;
+ chosenAction=method;
+ for(const tab of document.querySelectorAll('[data-case-tab]')){
+  const on=tab.dataset.caseTab===method;
+  tab.classList.toggle('active',on);tab.setAttribute('aria-selected',String(on));tab.tabIndex=on?0:-1;
+ }
+ for(const panel of document.querySelectorAll('[data-case-panel]'))panel.hidden=panel.dataset.casePanel!==method;
+ $('caseMode').textContent=actionLabel(method).toUpperCase();
+ clearWorkspaceMessage();
+}
+function displayAccount(){
+ const connected=Boolean(account);
+ $('caseGate').hidden=connected;$('caseConsole').hidden=!connected;
+ if(connected)$('caseSigner').textContent='CONNECTED OPERATOR  /  '+account+'  /  STUDIONET 61999';
 }
 function showPage(page){
  const id=['overview','workflow','explorer'].includes(page)?page:'overview';
@@ -103,17 +138,20 @@ function setBusy(value){
 function bind(){
  for(const b of document.querySelectorAll('[data-page]'))b.onclick=()=>showPage(b.dataset.page);
  window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)));
- $('wallet').onclick=()=>connect().catch(e=>notice('Wallet not connected',e.message));
+ $('wallet').onclick=()=>connect().catch(e=>workspaceMessage('Wallet not connected: '+e.message,true));
+ $('caseConnect').onclick=()=>connect().catch(e=>workspaceMessage('Wallet not connected: '+e.message,true));
+ $('txClose').onclick=dismissTx;
+ for(const b of document.querySelectorAll('[data-case-tab]'))b.onclick=()=>pickCase(b.dataset.caseTab);
  for(const action of project.forms){
   const f=document.querySelector('form[data-form="'+action.method+'"]');
-  f.onsubmit=e=>{e.preventDefault();write(action).catch(err=>{setBusy(false);notice('Not submitted',err.message)})};
+  f.onsubmit=e=>{e.preventDefault();write(action).catch(err=>{setBusy(false);if(!$('txPanel').hidden)notice('Transaction not submitted',String(err.message||err),0,'','error');else workspaceMessage(String(err.message||err),true)})};
  }
  for(const button of document.querySelectorAll('[data-fill]'))button.onclick=()=>{
   const m=button.dataset.fill,a=project.forms.find(x=>x.method===m),data=project.presets[a.preset]||{};
   for(const [key,val] of Object.entries(data)){
    const field=$('f_'+m+'_'+key);if(field)field.value=String(val);
   }
-  notice('Example loaded','Edit the values and verify the signer. Nothing was sent.');
+  workspaceMessage('Example loaded. Review the fields; nothing was signed.');
  };
  for(const button of document.querySelectorAll('[data-digest]'))button.onclick=async()=>{
   try{const m=button.dataset.digest,a=project.forms.find(x=>x.method===m);
@@ -121,18 +159,19 @@ function bind(){
    if(!text)throw Error('Enter the exact evidence or delivery content first');
    const field=a.fields.find(x=>x[2]==='hash');
    $('f_'+m+'_'+field[0]).value=await sha256(text);
-   notice('Content hash ready','SHA-256 computed locally from the exact text. No transaction sent.');
-  }catch(e){notice('Unable to calculate hash',e.message)}
+   workspaceMessage('SHA-256 computed locally from the exact text. Nothing was signed.');
+  }catch(e){workspaceMessage('SHA-256 failed: '+e.message,true)}
  };
  $('readForm').onsubmit=e=>{e.preventDefault();runRead()};
  $('readMethod').onchange=updateReadFields;
  $('retry').onclick=()=>{const p=loadPending();if(p)follow(p)};
  window.ethereum?.on?.('accountsChanged',a=>setAccount(a?.[0]||''));
- window.ethereum?.on?.('chainChanged',()=>notice('Network changed','Studionet 61999 required to sign'));
+ window.ethereum?.on?.('chainChanged',()=>workspaceMessage('Select GenLayer Studionet (61999) before signing.',true));
  showPage(location.hash.slice(1)||'overview');
+ pickCase(chosenAction);displayAccount();
  updateReadFields();
  const pending=loadPending();
- if(pending){$('retry').hidden=false;notice('Pending transaction saved','Recheck this transaction before signing anything else.',2,pending.hash)}
+ if(pending?.hash){$('retry').hidden=false;notice(actionLabel(pending.method)+' pending','Recheck this saved transaction before signing again.',0,pending.hash)}
 }
 function updateReadFields(){
  const r=project.reads[Number($('readMethod').value)];
@@ -164,6 +203,7 @@ function setAccount(a){
  account=ADDRESS.test(a||'')?a:'';
  $('wallet').textContent=account?short(account)+' · Switch':'Connect wallet';
  $('walletIdentity').textContent=account?'Active signer: '+account:'No wallet selected.';
+ displayAccount();
 }
 async function connect(){
  if(!window.ethereum)throw Error('Install a wallet extension with EIP-1193 support');
@@ -255,7 +295,7 @@ async function write(action){
  if(busy)return;
  if(!config?.configured)throw Error('Deploy both contracts and configure the addresses before signing');
  const old=loadPending();
- if(old){$('retry').hidden=false;notice('Previous transaction pending','Recheck the saved hash before signing again.',2,old.hash);return}
+ if(old){$('retry').hidden=false;notice(actionLabel(old.method)+' pending','Recheck the saved hash before signing again.',0,old.hash);return}
  setBusy(true);
  try{
   const args=argsOf(action);
@@ -273,10 +313,11 @@ async function write(action){
    rec.prior=stat[counters[1]];
    if(!Number.isSafeInteger(rec.prior))throw Error('Cannot verify pre-write count');
   }
-  notice('Confirm in wallet','Check the destination contract, signer and method. No automatic retries.',1);
+  notice('Confirm '+actionLabel(action.method),'Review the transaction in your wallet. No automatic retries.',0,'','pending');
   const hash=await client.writeContract({address:config[action.scope],functionName:action.method,args,value:0n});
   if(!/^0x[a-f0-9]{64}$/i.test(hash||''))throw Error('Wallet did not return valid transaction hash');
   rec.hash=hash;savePending(rec);$('retry').hidden=false;
+  notice(actionLabel(action.method)+' submitted','Signed request sent. Waiting for GenLayer finality.',0,hash,'pending');
   setBusy(false);await follow(rec);
  }finally{setBusy(false)}
 }
@@ -297,7 +338,7 @@ async function readProof(rec){
 async function follow(rec){
  if(checking)return;
  checking=true;setBusy(true);
- notice('Checking finality','Do not sign again. Waiting for execution result and exact stored-state readback.',2,rec.hash);
+ notice(actionLabel(rec.method)+' processing','GenLayer is finalizing this operation. Do not sign it again.',0,rec.hash,'pending');
  try{
   for(let i=0;i<55;i++){
    let tx;
@@ -309,27 +350,29 @@ async function follow(rec){
    const state=classifyTx(tx);
    if(state==='error'){
     clearPending();$('retry').hidden=true;
-    notice('Finalized execution rejected','Transaction rolled back or failed. No successful state is claimed.',2,rec.hash);
+    notice(actionLabel(rec.method)+' rejected','GenVM finalized with an error. No successful state change is claimed.',0,rec.hash,'error');
     return;
    }
    if(state==='success'){
+    notice(actionLabel(rec.method)+' finalized','GenVM SUCCESS. Confirming the exact stored record…',0,rec.hash,'pending');
     for(let n=0;n<9;n++){
      try{
       const proof=await readProof(rec);
       if(proof.ok){
        clearPending();$('retry').hidden=true;
-       notice('Signed and verified','FINALIZED / SUCCESS and exact LATEST_FINAL persisted state match. '+rec.method+'.',3,rec.hash);
+       const result=rec.method==='adjudicate'?('Verdict: '+String(proof.value?.verdict||'FINALIZED')):(Number.isSafeInteger(proof.value?.id)?('Record #'+proof.value.id+' saved'):'On-chain state verified');
+       notice(actionLabel(rec.method)+' successful',result+' · Confirmed against LATEST_FINAL.',0,rec.hash,'success');
        return;
       }
      }catch{}
      await new Promise(r=>setTimeout(r,2500));
     }
-    notice('Finalized, readback not verified','Keep the hash and use Recheck. The app will not infer success without matching state.',2,rec.hash);
+    notice(actionLabel(rec.method)+' needs readback','GenVM SUCCESS, but a matching stored record could not be confirmed yet. Recheck before signing again.',0,rec.hash,'warning');
     return;
    }
    await new Promise(r=>setTimeout(r,3200));
   }
-  notice('Finality unresolved','Transaction retained for safe recheck. Do not send duplicate writes.',2,rec.hash);
+  notice(actionLabel(rec.method)+' still pending','Transaction retained. Recheck the existing hash; do not submit another signature.',0,rec.hash,'warning');
  }finally{checking=false;setBusy(false)}
 }
 async function init(){
@@ -356,5 +399,7 @@ async function init(){
   $('workflowNotice').textContent='No serverless configuration available. Deploy contracts and API before signing.';
  }
  setBusy(false);
+ try{const a=await window.ethereum?.request?.({method:'eth_accounts'});if(ADDRESS.test(a?.[0]||''))setAccount(a[0]);}catch{}
+ const p=loadPending();if(p?.hash&&config?.configured)void follow(p);
 }
 init();
