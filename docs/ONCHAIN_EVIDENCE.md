@@ -58,3 +58,23 @@ The signed JSON delivery was:
 Independent `LATEST_FINAL` readback from `get_job(1)` returned `stage=DELIVERED`, `verdict=PENDING`, the exact submitted JSON delivery, and the exact SHA-256 digest above. The original frozen agreement and reference fixture remained unchanged; the agreement requires `approvedTotal=20`. `ServiceCourt.stats().jobs=1`.
 
 **Proof boundary:** This proves Agent-signed submission and persisted delivery evidence, not a verdict that the agent is at fault. A client dispute and separate finalized AI adjudication are required before assigning responsibility. No ledger outcome is claimed at this step.
+
+
+## Signed execution — Client dispute for Job #1
+
+| Field | Observed value |
+| --- | --- |
+| Method | `ServiceCourt.open_dispute(1, claim)` |
+| Transaction | [`0xcad77aa8d1d7e9635fbb8b9d8dcf28733eb2a0f19a4ca9a37a9cb53d323cac91`](https://explorer-studio.genlayer.com/tx/0xcad77aa8d1d7e9635fbb8b9d8dcf28733eb2a0f19a4ca9a37a9cb53d323cac91) |
+| Client / signer | `0x4C7cb73aC8F8999af21cfc9fF4cF2333a9508Dcb` |
+| Contract | `0xD64b7cb41416BefA082f753EC762095d61607457` |
+| Execution | `FINALIZED`, GenVM `SUCCESS` (consensus `Accepted`) |
+| Return value | `null` (successful state-changing call) |
+
+The signed client claim was:
+
+> The signed report has approvedTotal=27, but the locked source has only approved invoices INV-1=12 and INV-3=8, totaling exactly 20. The delivery violates the explicit total requirement; decide responsibility from these frozen facts.
+
+An independent `LATEST_FINAL` read of `get_job(1)` confirmed `stage=DISPUTED`, `verdict=PENDING`, unchanged `client` and `agent` addresses, the exact stored client claim, and the previously signed delivery and hashes. `ServiceCourt.stats().jobs=1`.
+
+**Proof boundary:** This records a client-signed dispute and intact disputed facts; the AI Consensus judgment and any ledger reputation outcome remain unobserved at this stage.
