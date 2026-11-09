@@ -16,6 +16,7 @@ class Address:
 class Return:
     def __init__(self,v):self.calldata=v
 class Contract:
+    def view(self): return self
     def __new__(cls,*args,**kwargs):
         c=super().__new__(cls)
         for name,k in cls.__annotations__.items():
