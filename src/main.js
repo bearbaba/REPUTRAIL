@@ -268,8 +268,11 @@ async function precheck(record){
    throw Error('Assigned agent only, before delivery closes');
   if(['open_dispute','accept_delivery'].includes(m)&&(!same(j.client,actor)||j.stage!=='DELIVERED'))
    throw Error('Client only; job must be delivered but not decided');
-  if(m==='adjudicate'&&(j.stage!=='DISPUTED'||j.verdict!=='PENDING'))
-   throw Error('Only a pending dispute can be adjudicated');
+  if(m==='adjudicate'&&(j.stage!=='DISPUTED'||j.verdict!=='PENDING')){
+   if(j.stage==='DECIDED')
+    throw Error('Job #'+a[0]+' is already adjudicated: '+j.verdict+'. Select Record eligible reputation event to continue.');
+   throw Error('Job #'+a[0]+' is '+j.stage+' / '+j.verdict+'. Only a pending dispute can be adjudicated.');
+  }
  }else if(m==='record_outcome'){
   const [perm,old]=await Promise.all([api('first','reputation_permission',[a[0]]),api('second','outcome_for',[a[0]])]);
   if(perm.allowed!==true||old)throw Error('Only a final eligible unrecorded outcome can enter the ledger');
