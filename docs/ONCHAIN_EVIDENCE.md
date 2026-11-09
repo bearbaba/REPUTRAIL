@@ -36,3 +36,25 @@ Independent `LATEST_FINAL` readback of `ServiceCourt.get_job(1)` confirmed:
 - `ServiceCourt.stats().jobs=1`; `ReputationLedger.stats().outcomes=0`.
 
 **Proof boundary:** This transaction proves one client-signed service job was created with a fixed agreement and an assigned agent. It does not yet establish delivery, dispute adjudication, AI consensus verdict, or a recorded reputation event.
+
+
+## Signed execution — Agent delivery for Job #1
+
+| Field | Observed value |
+| --- | --- |
+| Method | `ServiceCourt.submit_delivery(1,delivery,delivery_sha256)` |
+| Transaction | [`0xe9f80265f978e6d0ee7bbe62567552c1e1d6afc56d47572c2b89588469db5a4a`](https://explorer-studio.genlayer.com/tx/0xe9f80265f978e6d0ee7bbe62567552c1e1d6afc56d47572c2b89588469db5a4a) |
+| Signer / agent | `0xD6b8A3A5eB329410D9504784812b8569afA8C2aF` |
+| Contract | `0xD64b7cb41416BefA082f753EC762095d61607457` |
+| Execution | `FINALIZED`, GenVM `SUCCESS`, consensus `Accepted` |
+| Return value | `null` — successful state-changing call |
+| Delivery SHA-256 | `7cfe8dbf70a9f3a9a82a32aeeea81ade23683458ebe1b560f8bdedfebe4f6897` |
+
+The signed JSON delivery was:
+```json
+{"approvedIds":["INV-1","INV-3"],"approvedTotal":27,"description":"Synthetic agent report with an incorrect approved total."}
+```
+
+Independent `LATEST_FINAL` readback from `get_job(1)` returned `stage=DELIVERED`, `verdict=PENDING`, the exact submitted JSON delivery, and the exact SHA-256 digest above. The original frozen agreement and reference fixture remained unchanged; the agreement requires `approvedTotal=20`. `ServiceCourt.stats().jobs=1`.
+
+**Proof boundary:** This proves Agent-signed submission and persisted delivery evidence, not a verdict that the agent is at fault. A client dispute and separate finalized AI adjudication are required before assigning responsibility. No ledger outcome is claimed at this step.
