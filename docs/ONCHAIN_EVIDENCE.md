@@ -90,3 +90,26 @@ The public `LATEST_FINAL` state of `ServiceCourt.get_job(1)` was queried after t
 - `ReputationLedger.stats().outcomes=0`; `outcome_for(1)` returned no record.
 
 **Evidence boundary:** This is a verifiable finalized **contract-state observation**, not a claimed, verified adjudication transaction receipt. The `adjudicate(1)` transaction hash has not been attached, so the individual signer, nonce and transaction consensus record are not separately asserted here. The case is eligible for a distinct ledger recording transaction, which has not yet been observed.
+
+
+## Signed execution — ReputationLedger Outcome #1
+
+| Field | Verified value |
+| --- | --- |
+| Method | `ReputationLedger.record_outcome(1)` |
+| Transaction | [`0xd502bf6a68b3e7c44830a110e94d2f53c95cf29dead2edffcc18530e960f05df`](https://explorer-studio.genlayer.com/tx/0xd502bf6a68b3e7c44830a110e94d2f53c95cf29dead2edffcc18530e960f05df) |
+| Signer | `0x4C7cb73aC8F8999af21cfc9fF4cF2333a9508Dcb` |
+| Ledger contract | `0x30eaf3F2f0482D4120113aD177e9359fdBe82376` |
+| Execution | `FINALIZED` / GenVM `SUCCESS`, consensus `Accepted` |
+| Return | Outcome ID `1` |
+
+Independent `LATEST_FINAL` state reads verified:
+
+- `ReputationLedger.stats().outcomes=1` and `court=0xD64b7cb41416BefA082f753EC762095d61607457`.
+- `get_outcome(1)` matches `outcome_for(1)`: `id=1`, `job_id=1`, `verdict=AGENT_AT_FAULT`.
+- `agent=0xd6b8a3a5eb329410d9504784812b8569afa8c2af`, `client=0x4c7cb73ac8f8999af21cfc9ff4cf2333a9508dcb`.
+- Original frozen digests persisted: `agreement_sha256=7b92cc561473808a68c17bf6c97912e733b0423e1a1a5f0edc474dd208ce9ab8`, `delivery_sha256=7cfe8dbf70a9f3a9a82a32aeeea81ade23683458ebe1b560f8bdedfebe4f6897`.
+- `get_profile(agent)={accepted:0,faults:1,rejected_claims:0,total:1}`.
+- `ServiceCourt.get_job(1).stage=DECIDED`, `verdict=AGENT_AT_FAULT`.
+
+**Evidence boundary:** The signed ledger transaction and persisted outcome are confirmed. The separate Court AI adjudication transaction hash is not yet available, so this document cites the finalized verdict **as stored state**, not as a separately verified receipt with an asserted signer. Do not infer that a finalized rolled-back transaction would update the ledger.
