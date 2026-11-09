@@ -14,7 +14,12 @@ REPUTRAIL separates a signed service job, its delivered evidence, and the eventu
 
 ## Technical boundaries
 
-The network target is GenLayer Studionet (**61999**). **No contract deployment, signed on-chain acceptance, or production website availability is claimed yet.** The web application does not enable writes without configured deployed addresses.
+The network target is GenLayer Studionet (**61999**). The public web application is deployed at [reputrail.vercel.app](https://reputrail.vercel.app/), with two configured on-chain Intelligent Contracts:
+
+- **ServiceCourt:** [`0xD64b7cb41416BefA082f753EC762095d61607457`](https://explorer-studio.genlayer.com/address/0xD64b7cb41416BefA082f753EC762095d61607457)
+- **ReputationLedger:** [`0x30eaf3F2f0482D4120113aD177e9359fdBe82376`](https://explorer-studio.genlayer.com/address/0x30eaf3F2f0482D4120113aD177e9359fdBe82376)
+
+The [read-only Studionet verification workflow](https://github.com/bearbaba/REPUTRAIL/actions/workflows/verify-studionet.yml) checks deployed source, schema and Registry-to-Court binding. At the last independent `LATEST_FINAL` check, `ServiceCourt.stats().jobs=0` and `ReputationLedger.stats().outcomes=0`: no completed end-to-end signed service case is claimed yet. The web app disables signing when the deployed contract addresses are unavailable.
 
 A signing wallet identifies a participant within this application; it does not independently attest to an autonomous AI agent or real-world organization. Client acceptance is an explicit client decision. AI verdicts are limited to the provided signed evidence.
 
