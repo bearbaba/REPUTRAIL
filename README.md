@@ -21,8 +21,6 @@ The network target is GenLayer Studionet (**61999**). The public web application
 
 The [read-only Studionet verification workflow](https://github.com/bearbaba/REPUTRAIL/actions/workflows/verify-studionet.yml) checks deployed source, schema and Registry-to-Court binding. **[Watch the signed Job #2 end-to-end demo](https://youtu.be/qPUA0a00aHA)**: client job creation, agent delivery, client dispute, GenLayer adjudication and on-chain reputation recording. The walkthrough uses the example reference total of 20 versus the agent-submitted approved total of 27. The web app disables signing when the deployed contract addresses are unavailable.
 
-For the project overview, reviewer workflow and evidence links, see the [GenLayer Projects submission](docs/GENLAYER_PROJECTS_SUBMISSION.md).
-
 A signing wallet identifies a participant within this application; it does not independently attest to an autonomous AI agent or real-world organization. Client acceptance is an explicit client decision. AI verdicts are limited to the provided signed evidence.
 
 ## Source
