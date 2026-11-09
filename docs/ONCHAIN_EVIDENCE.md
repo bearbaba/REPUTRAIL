@@ -1,7 +1,7 @@
 # REPUTRAIL — Verified GenLayer Studionet evidence
 
 **Chain:** GenLayer Studionet (61999)  
-**Verification:** independent public transaction receipt and `LATEST_FINAL` contract reads. This document records observed signed activity; it does not assert an unobserved end-to-end outcome.
+**Verification:** public transaction receipts, `FINALIZED / SUCCESS` GenVM execution results, and independently queried `LATEST_FINAL` contract readbacks. Five distinct signed transactions document one complete synthetic service dispute and its ReputationLedger outcome.
 
 ## Deployed contracts
 
@@ -80,17 +80,30 @@ An independent `LATEST_FINAL` read of `get_job(1)` confirmed `stage=DISPUTED`, `
 **Proof boundary:** This records a client-signed dispute and intact disputed facts; the AI Consensus judgment and any ledger reputation outcome remain unobserved at this stage.
 
 
-## Job #1 post-adjudication readback (transaction hash to be linked)
+## Signed execution — AI consensus adjudication for Job #1
 
-The public `LATEST_FINAL` state of `ServiceCourt.get_job(1)` was queried after the user observed a pre-signing message that the job was no longer awaiting adjudication. Readback returned:
+| Field | Verified value |
+| --- | --- |
+| Method | `ServiceCourt.adjudicate(1)` |
+| Transaction | [`0x5b4f664200fe9cba9e1629108eb95c4df94d903576de080d42bcce7964fb9202`](https://explorer-studio.genlayer.com/tx/0x5b4f664200fe9cba9e1629108eb95c4df94d903576de080d42bcce7964fb9202) |
+| Signer / caller | `0x4C7cb73aC8F8999af21cfc9fF4cF2333a9508Dcb` |
+| ServiceCourt | `0xD64b7cb41416BefA082f753EC762095d61607457` |
+| Client nonce | `478` |
+| Block-explorer time | Nov 9, 2026, 2:35:53 PM |
+| Consensus | `Accepted`, initial validators `5` |
+| GenVM execution | `FINALIZED / SUCCESS` |
+| Return value | `"AGENT_AT_FAULT"` |
+| Equivalence Principle output | `"AGENT_AT_FAULT"` |
+
+The signed agent output contained `approvedTotal=27`, violating the frozen agreement requiring `approvedTotal=20` from approved invoices INV-1 (12) and INV-3 (8), excluding INV-2 (7). The client had frozen a concrete claim against this mismatch in the prior transaction.
+
+Independent `LATEST_FINAL` reads of `ServiceCourt.get_job(1)` and `ServiceCourt.reputation_permission(1)` confirmed:
 
 - `id=1`, `stage=DECIDED`, `verdict=AGENT_AT_FAULT`
-- The persisted agent delivery remains `approvedTotal=27`; the frozen agreement requires `approvedTotal=20`
-- `reputation_permission(1).allowed=true`, with the original `agreement_sha256=7b92cc561473808a68c17bf6c97912e733b0423e1a1a5f0edc474dd208ce9ab8` and `delivery_sha256=7cfe8dbf70a9f3a9a82a32aeeea81ade23683458ebe1b560f8bdedfebe4f6897`
-- `ReputationLedger.stats().outcomes=0`; `outcome_for(1)` returned no record.
+- `reputation_permission(1).allowed=true`, with original `agreement_sha256=7b92cc561473808a68c17bf6c97912e733b0423e1a1a5f0edc474dd208ce9ab8` and `delivery_sha256=7cfe8dbf70a9f3a9a82a32aeeea81ade23683458ebe1b560f8bdedfebe4f6897`
+- Original client, assigned agent, agreement, delivery and dispute remained attached to the same Job #1.
 
-**Evidence boundary:** This is a verifiable finalized **contract-state observation**, not a claimed, verified adjudication transaction receipt. The `adjudicate(1)` transaction hash has not been attached, so the individual signer, nonce and transaction consensus record are not separately asserted here. The case is eligible for a distinct ledger recording transaction, which has not yet been observed.
-
+**Verification:** The adjudication transaction hash, execution, returned verdict, and finalized on-chain readback are now all directly evidenced. The verdict concerns this synthetic signed case only; it does not prove real-world agent execution or identity.
 
 ## Signed execution — ReputationLedger Outcome #1
 
@@ -112,4 +125,4 @@ Independent `LATEST_FINAL` state reads verified:
 - `get_profile(agent)={accepted:0,faults:1,rejected_claims:0,total:1}`.
 - `ServiceCourt.get_job(1).stage=DECIDED`, `verdict=AGENT_AT_FAULT`.
 
-**Evidence boundary:** The signed ledger transaction and persisted outcome are confirmed. The separate Court AI adjudication transaction hash is not yet available, so this document cites the finalized verdict **as stored state**, not as a separately verified receipt with an asserted signer. Do not infer that a finalized rolled-back transaction would update the ledger.
+**Evidence boundary:** The ledger transaction, the separate AI consensus adjudication transaction, and corresponding persisted records are all confirmed. These constitute an end-to-end synthetic service-dispute demonstration, not proof of external service delivery, real-world identities, or autonomous agent execution. A finalized rolled-back transaction would not qualify as a successful state change.
