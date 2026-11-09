@@ -1,6 +1,7 @@
 import './style.css';
 import {project} from './project.js';
 import {parseValue,classifyTx,verifyStored} from '../lib/verification.js';
+import {readHistory,rememberTx,updateTxStatus,displayStatus,HASH_RE} from '../lib/tx-history.js';
 import {createClient} from 'genlayer-stable';
 import {studionet} from 'genlayer-stable/chains';
 
@@ -9,6 +10,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const ADDRESS=/^0x[a-fA-F0-9]{40}$/;
 const CHAIN=61999, txPrefix='https://explorer-studio.genlayer.com/tx/';
 const pendingKey=project.id+'-pending-write-v1';
+const txStorage=()=>window.localStorage;
 let config=null,account='',busy=false,checking=false;
 const same=(x,y)=>String(x).toLowerCase()===String(y).toLowerCase();
 const short=x=>ADDRESS.test(x||'')?x.slice(0,6)+'…'+x.slice(-4):'Connect wallet';
@@ -41,7 +43,8 @@ function render(){
  '<div class="sidebar-caption">OPERATIONS</div><nav class="nav" aria-label="Main navigation">'+
  '<button type="button" class="active" data-page="overview"><span class="nav-symbol">◫</span> Command center <span class="nav-index">01</span></button>'+
  '<button type="button" data-page="workflow"><span class="nav-symbol">⤳</span> Case operations <span class="nav-index">02</span></button>'+
- '<button type="button" data-page="explorer"><span class="nav-symbol">⌁</span> Evidence terminal <span class="nav-index">03</span></button></nav>'+
+ '<button type="button" data-page="explorer"><span class="nav-symbol">⌁</span> Evidence terminal <span class="nav-index">03</span></button>'+ 
+ '<button type="button" data-page="transactions"><span class="nav-symbol">▤</span> Transactions <span class="nav-index">04</span></button></nav>'+
  '<div class="sidebar-caption" style="margin-top:38px">PROTOCOL MODULES</div><div class="sidebar-modules"><div><span>SC</span> ServiceCourt <b>ACTIVE SOURCE</b></div><div><span>RL</span> ReputationLedger <b>ACTIVE SOURCE</b></div></div>'+
  '<div class="sidebar-bottom"><div class="system-indicator"><i></i> GENLAYER STUDIO / 61999</div><p>All displayed outcomes must be verified from final on-chain records.</p><a href="https://github.com/bearbaba/REPUTRAIL" target="_blank" rel="noopener">VIEW SOURCE <span>↗</span></a></div></aside>'+
  '<div class="ops-workspace"><header class="ops-topbar"><div class="breadcrumb"><span>REPUTRAIL</span><span class="slash">/</span><span id="breadcrumb">Command center</span></div>'+
@@ -78,11 +81,20 @@ function render(){
  '<label>Case / record ID<input id="readId" type="number" value="1" min="1" step="1"></label><label>Wallet address<input id="readActor" type="text" placeholder="0x…"></label></div>'+
  '<button class="primary" type="submit">Run on-chain read ↗</button></form>'+
  '<div class="json-head"><span>RETURN DATA</span><span>FINALIZED VIEW</span></div><pre id="readResult" class="readResult">{"status":"awaiting query"}</pre></div></div></section>'+
- '</main><aside class="activity" id="txPanel" role="status" aria-live="polite" hidden><div class="activity-kicker"><span class="live-pulse"></span> LIVE TRANSACTION <button type="button" id="txClose" aria-label="Close transaction notification">×</button></div>'+
+ '<section class="page" id="transactions" hidden><div class="terminal-heading"><div class="eyebrow">TRANSACTION JOURNAL / STUDIONET 61999</div><h1>Signed.<br><span>Traceable.</span></h1><p>New signed transactions are saved in this browser automatically. Import any older transaction by its public hash and verify its current execution status without connecting a wallet.</p></div>'+
+ '<div class="history-stats"><div><small>LOCAL TRANSACTIONS</small><strong id="txCount">0</strong><span>This browser only · up to 100 entries</span></div><div><small>FINALITY POLICY</small><strong>FINALIZED ≠ SUCCESS</strong><span>GenVM execution and state verification remain distinct</span></div></div>'+
+ '<section class="history-panel"><div class="history-header"><div><small>ACTIVITY / 61999</small><h2>Recent signatures</h2></div><button id="refreshHistory" type="button">Refresh statuses ↻</button></div>'+
+ '<p class="history-note">Only transactions signed or imported here after this feature was added appear automatically. Earlier transactions cannot be recovered from local storage if their hashes were not saved.</p>'+
+ '<div id="txHistoryList" class="history-list" aria-live="polite"></div></section>'+
+ '<section class="history-panel"><div class="history-header"><div><small>PUBLIC HASH LOOKUP</small><h2>Verify a receipt</h2></div></div>'+
+ '<form id="importHistory" class="history-import"><label for="importHash">Studionet transaction hash</label><div><input id="importHash" type="text" placeholder="0x… 64 hex characters" spellcheck="false" autocomplete="off" required><button class="primary" type="submit">Track hash ↗</button></div></form>'+
+ '<p id="historyFeedback" class="history-feedback" role="status"></p></section>'+
+ '<p class="history-note">Independent service case evidence: <a href="https://github.com/bearbaba/REPUTRAIL/blob/main/docs/ONCHAIN_EVIDENCE.md" rel="noopener" target="_blank">On-chain evidence ↗</a>. For older transactions not in this browser, search the public <a href="https://explorer-studio.genlayer.com/txs" rel="noopener" target="_blank">GenLayer Explorer ↗</a>.</p></section>'+
+  '</main><aside class="activity" id="txPanel" role="status" aria-live="polite" hidden><div class="activity-kicker"><span class="live-pulse"></span> LIVE TRANSACTION <button type="button" id="txClose" aria-label="Close transaction notification">×</button></div>'+
  '<div class="tx-state-line"><span id="txSpinner" class="tx-spinner" hidden></span><h2 id="txTitle" class="txState">Waiting for wallet</h2></div><p id="txInfo" class="txInfo">No transaction signed yet.</p>'+
  '<div class="txHashLabel" id="txHashLabel" hidden>TRANSACTION HASH</div><div id="txHash" class="txHash" hidden></div>'+
  '<a id="txLink" rel="noopener" target="_blank" hidden>View on Explorer ↗</a>'+
- '<button id="retry" type="button" hidden>Recheck transaction</button><div id="walletIdentity" class="walletIdentity" hidden></div></aside></div></div></div>';
+ '<button id="retry" type="button" hidden>Recheck transaction</button><button id="openHistory" type="button" class="tx-history-shortcut">Transactions ↗</button><div id="walletIdentity" class="walletIdentity" hidden></div></aside></div></div></div>';
  bind();
 }
 let chosenAction='open_job',txDismiss=null,txToken=0;
@@ -125,11 +137,12 @@ function displayAccount(){
  if(connected)$('caseSigner').textContent='CONNECTED OPERATOR  /  '+account+'  /  STUDIONET 61999';
 }
 function showPage(page){
- const id=['overview','workflow','explorer'].includes(page)?page:'overview';
- for(const p of ['overview','workflow','explorer'])$(p).hidden=p!==id;
+ const id=['overview','workflow','explorer','transactions'].includes(page)?page:'overview';
+ for(const p of ['overview','workflow','explorer','transactions'])$(p).hidden=p!==id;
  for(const b of document.querySelectorAll('[data-page]'))b.classList.toggle('active',b.dataset.page===id);
  $('breadcrumb').textContent=id[0].toUpperCase()+id.slice(1);
  if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);
+ if(id==='transactions')renderHistory();
 }
 function setBusy(value){
  busy=value;
@@ -141,6 +154,13 @@ function bind(){
  $('wallet').onclick=()=>connect().catch(e=>workspaceMessage('Wallet not connected: '+e.message,true));
  $('caseConnect').onclick=()=>connect().catch(e=>workspaceMessage('Wallet not connected: '+e.message,true));
  $('txClose').onclick=dismissTx;
+ $('openHistory').onclick=()=>showPage('transactions');
+ $('refreshHistory').onclick=()=>void refreshHistoryStatuses();
+ $('importHistory').onsubmit=e=>{e.preventDefault();const hash=$('importHash').value.trim();
+  if(!HASH_RE.test(hash)){$('historyFeedback').textContent='Enter a valid 0x-prefixed 64-digit transaction hash.';return}
+  rememberTx(txStorage(),{hash,method:'unknown',status:'pending'});$('importHash').value='';renderHistory();void checkHistoryHash(hash);
+ };
+ $('txHistoryList').onclick=e=>{const button=e.target.closest('button[data-history-hash]');if(button)void checkHistoryHash(button.dataset.historyHash)};
  for(const b of document.querySelectorAll('[data-case-tab]'))b.onclick=()=>pickCase(b.dataset.caseTab);
  for(const action of project.forms){
   const f=document.querySelector('form[data-form="'+action.method+'"]');
@@ -171,12 +191,67 @@ function bind(){
  pickCase(chosenAction);displayAccount();
  updateReadFields();
  const pending=loadPending();
- if(pending?.hash){$('retry').hidden=false;notice(actionLabel(pending.method)+' pending','Recheck this saved transaction before signing again.',0,pending.hash)}
+ if(pending?.hash){rememberWrite(pending);$('retry').hidden=false;notice(actionLabel(pending.method)+' pending','Recheck this saved transaction before signing again.',0,pending.hash)}
 }
 function updateReadFields(){
  const r=project.reads[Number($('readMethod').value)];
  $('readId').parentElement.hidden=!r[3].includes('id');
  $('readActor').parentElement.hidden=!r[3].includes('address');
+}
+
+function renderHistory(){
+ const items=readHistory(txStorage());
+ $('txCount').textContent=String(items.length);
+ $('txHistoryList').innerHTML=items.map((tx,i)=>{
+  const when=Number.isFinite(tx.savedAt)?new Date(tx.savedAt).toLocaleString():'Time unavailable';
+  return '<article class="history-entry"><div class="history-top"><span class="history-seq">'+String(i+1).padStart(2,'0')+'</span><div><strong>'+esc(tx.method==='unknown'?'Tracked transaction':actionLabel(tx.method))+'</strong><small>'+esc(when)+' · Studionet 61999</small></div>'+
+   '<span class="history-status">'+esc(displayStatus(tx.status))+'</span></div><code>'+esc(tx.hash)+'</code>'+
+   (tx.actor?'<p>Signer: '+esc(tx.actor)+'</p>':'')+
+   '<div class="history-actions"><a href="'+txPrefix+encodeURIComponent(tx.hash)+'" target="_blank" rel="noopener">Explorer receipt ↗</a>'+
+   '<button type="button" data-history-hash="'+esc(tx.hash)+'">Recheck ↻</button></div></article>'
+ }).join('')||'<p class="history-empty">No transactions saved in this browser yet. New signed calls will be added automatically; existing public hashes can be imported below.</p>';
+}
+async function checkHistoryHash(hash){
+ if(!HASH_RE.test(hash))return;
+ $('historyFeedback').textContent='Checking '+hash.slice(0,12)+'…';
+ $('refreshHistory').disabled=true;
+ try{
+  const response=await fetch('/api/tx?hash='+encodeURIComponent(hash),{cache:'no-store'});
+  const result=await response.json();
+  if(!response.ok||!result.ok)throw Error(result.error||'Transaction lookup unavailable');
+  const verdict=classifyTx(result);
+  const pending=loadPending();
+  if(verdict==='error'){
+   updateTxStatus(txStorage(),hash,'error');
+   if(pending?.hash?.toLowerCase()===hash.toLowerCase()){clearPending();$('retry').hidden=true}
+  }else if(verdict==='success'){
+   let verified=false;
+   if(pending?.hash?.toLowerCase()===hash.toLowerCase()){
+    try{verified=Boolean((await readProof(pending)).ok)}catch{}
+    if(verified){clearPending();$('retry').hidden=true}
+   }
+   const old=readHistory(txStorage()).find(x=>x.hash===hash.toLowerCase());
+   updateTxStatus(txStorage(),hash,(verified||old?.status==='verified')?'verified':'finalized-success');
+  }else{
+   const old=readHistory(txStorage()).find(x=>x.hash===hash.toLowerCase());
+   if(!old||['pending','state-unverified'].includes(old.status))
+    updateTxStatus(txStorage(),hash,'pending');
+  }
+  const latest=readHistory(txStorage()).find(x=>x.hash===hash.toLowerCase());
+  $('historyFeedback').textContent=latest?('Chain status: '+displayStatus(latest.status)+
+   '. An imported hash is execution-checked; exact stored-state verification requires the original signed action context.'):
+    'Transaction status unavailable';
+ }catch(error){$('historyFeedback').textContent='Lookup failed: '+String(error.message||error)}
+ finally{$('refreshHistory').disabled=false;renderHistory()}
+}
+async function refreshHistoryStatuses(){
+ const items=readHistory(txStorage()).slice(0,12);
+ if(!items.length){$('historyFeedback').textContent='No saved hashes to check.';return}
+ for(const item of items)await checkHistoryHash(item.hash);
+}
+function rememberWrite(rec,status='pending'){
+ rememberTx(txStorage(),{hash:rec.hash,method:rec.method,actor:rec.actor,status});
+ if(!$('transactions').hidden)renderHistory();
 }
 async function api(scope,method,args=[]){
  const url=new URL('/api/state',location.origin);
@@ -319,7 +394,7 @@ async function write(action){
   notice('Confirm '+actionLabel(action.method),'Review the transaction in your wallet. No automatic retries.',0,'','pending');
   const hash=await client.writeContract({address:config[action.scope],functionName:action.method,args,value:0n});
   if(!/^0x[a-f0-9]{64}$/i.test(hash||''))throw Error('Wallet did not return valid transaction hash');
-  rec.hash=hash;savePending(rec);$('retry').hidden=false;
+  rec.hash=hash;savePending(rec);rememberWrite(rec);$('retry').hidden=false;
   notice(actionLabel(action.method)+' submitted','Signed request sent. Waiting for GenLayer finality.',0,hash,'pending');
   setBusy(false);await follow(rec);
  }finally{setBusy(false)}
@@ -352,7 +427,7 @@ async function follow(rec){
    }catch{await new Promise(r=>setTimeout(r,3200));continue}
    const state=classifyTx(tx);
    if(state==='error'){
-    clearPending();$('retry').hidden=true;
+    rememberWrite(rec,'error');clearPending();$('retry').hidden=true;
     notice(actionLabel(rec.method)+' rejected','GenVM finalized with an error. No successful state change is claimed.',0,rec.hash,'error');
     return;
    }
@@ -362,7 +437,7 @@ async function follow(rec){
      try{
       const proof=await readProof(rec);
       if(proof.ok){
-       clearPending();$('retry').hidden=true;
+       rememberWrite(rec,'verified');clearPending();$('retry').hidden=true;
        const result=rec.method==='adjudicate'?('Verdict: '+String(proof.value?.verdict||'FINALIZED')):(Number.isSafeInteger(proof.value?.id)?('Record #'+proof.value.id+' saved'):'On-chain state verified');
        notice(actionLabel(rec.method)+' successful',result+' · Confirmed against LATEST_FINAL.',0,rec.hash,'success');
        return;
@@ -370,11 +445,13 @@ async function follow(rec){
      }catch{}
      await new Promise(r=>setTimeout(r,2500));
     }
+    rememberWrite(rec,'state-unverified');
     notice(actionLabel(rec.method)+' needs readback','GenVM SUCCESS, but a matching stored record could not be confirmed yet. Recheck before signing again.',0,rec.hash,'warning');
     return;
    }
    await new Promise(r=>setTimeout(r,3200));
   }
+  rememberWrite(rec,'pending');
   notice(actionLabel(rec.method)+' still pending','Transaction retained. Recheck the existing hash; do not submit another signature.',0,rec.hash,'warning');
  }finally{checking=false;setBusy(false)}
 }
