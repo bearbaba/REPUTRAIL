@@ -1,0 +1,28 @@
+name: Read-only Studionet source and binding check
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'contracts/**'
+      - 'scripts/preflight.mjs'
+      - '.github/workflows/verify-studionet.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      SERVICE_COURT_ADDRESS: '0xD64b7cb41416BefA082f753EC762095d61607457'
+      REPUTATION_LEDGER_ADDRESS: '0x30eaf3F2f0482D4120113aD177e9359fdBe82376'
+      FIRST_SOURCE_PATH: 'contracts/service_court.py'
+      SECOND_SOURCE_PATH: 'contracts/reputation_ledger.py'
+      SECOND_LINK_FIELD: 'court'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm run preflight
